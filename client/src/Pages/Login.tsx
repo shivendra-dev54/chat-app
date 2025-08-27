@@ -1,25 +1,23 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import axios from "axios";
 import toast from "react-hot-toast";
 import { useAuthStore, type IUser } from "../store/authStore";
+import { axios_helper } from "../lib/api";
 
 export const Login = () => {
   const [credentials, setCredentials] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const { update_user, user } = useAuthStore();
+  const { setUser, user } = useAuthStore();
 
   useEffect(() => {
-    if(user){
+    if (user) {
       navigate("/community");
     }
   }, [user, navigate]);
 
-  const validateEmail = (email: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
+  const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -39,46 +37,48 @@ export const Login = () => {
     setLoading(true);
 
     try {
-      const url = "http://localhost:64000/api/auth/login";
-
-      const res = await axios.post(url, {
-        email: credentials.email,
-        password: credentials.password,
+      const res = await axios_helper({
+        url: "http://localhost:64000/api/auth/login",
+        method: "POST",
+        credentials: true,
+        body: {
+          email: credentials.email,
+          password: credentials.password,
+        },
       });
 
-      const user_cookie: IUser = {
-        id: res.data.data.id,
-        username: res.data.data.username,
-        email: res.data.data.email,
-        about: res.data.data.about,
+      if (res.error) {
+        toast.dismissAll();
+        toast.error("Invalid credentials or server error");
+        console.error(res.data);
+        return;
       }
 
-      update_user(user_cookie);
+      const data = res.data.data;
+
+      const user_cookie: IUser = {
+        id: data.id,
+        username: data.username,
+        email: data.email,
+        about: data.about,
+      };
+
+      setUser(user_cookie);
 
       toast.dismissAll();
       toast.success("Login successful!");
 
-      // Reset form
       setCredentials({ email: "", password: "" });
-
-      // Redirect after login
       navigate("/community");
-    } catch (err: unknown) {
-      toast.dismissAll();
-      toast.error("Invalid credentials or server error");
-
-      if (axios.isAxiosError(err)) {
-        console.error("Axios error:", err.response?.data || err.message);
-      } else {
-        console.error("Unexpected error:", err);
-      }
+    } catch (err) {
+      console.error("Unexpected error:", err);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center h-[calc(100vh-4rem)] w-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-950 px-6">
+    <div className="flex items-center justify-center h-[calc(100vh-4rem)] w-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-950 px-6 select-none">
       <div className="bg-gray-900/90 backdrop-blur-md rounded-2xl shadow-2xl p-10 w-full max-w-md">
         <h1 className="text-4xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 text-center animate-pulse">
           Login

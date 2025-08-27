@@ -21,7 +21,7 @@ A modern real-time chat application built with **Bun**, **Elysia**, **React**, *
 - Fetch individual user data or all users
 - Real-time chat with multiple users
 - WebSocket-based messaging system
-- Typing indicators and instant message updates
+- Instant message updates
 - Secure password hashing with bcrypt
 - JWT-based access and refresh tokens
 
@@ -41,6 +41,11 @@ A modern real-time chat application built with **Bun**, **Elysia**, **React**, *
 - `GET /api/user/get/:id` – Get user by ID  
 - `GET /api/user/get/all` – Get all users
 
+### Chat
+
+- `GET /api/chat/get` – Get chats between users  
+- `DELETE /api/chat/delete/:id` – Delete a chat send by user
+
 ### WebSocket
 
 - `ws://localhost:64000/ws` – Real-time messaging endpoint
@@ -53,12 +58,12 @@ Environment variables in `.env`:
 
 ```env
 PORT=64000
-DATABASE_URL='pos'
+DATABASE_URL='neon_db_url'
 NODE_ENV='production'
 
-REFRESH_TOKEN=you_are_aware_just_simple_as_that
-ACCESS_TOKEN=scratching_wounds_will_only_hurt
-JWT_SECRET=you_are_not_allowed_have_revenge
+REFRESH_TOKEN=
+ACCESS_TOKEN=
+JWT_SECRET=
 
 CLIENT_URL=http://localhost:5173
 ```
@@ -86,10 +91,10 @@ The backend will run on `http://localhost:64000`.
 cd client
 
 # Install dependencies
-npm install
+bun install
 
 # Start Vite dev server
-npm run dev
+bun run dev
 ```
 
 The frontend will run on `http://localhost:5173`.

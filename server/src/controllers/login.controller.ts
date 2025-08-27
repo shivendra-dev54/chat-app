@@ -12,7 +12,7 @@ interface ILoginProps {
 }
 
 export const login_controller = async (ctx: Context) => {
-    const { email, password } = ctx.body as ILoginProps;
+    const { email, password } = (await ctx.request.json()) as ILoginProps;
 
     if (!email || !password) {
         return new ApiResponse({
@@ -72,17 +72,21 @@ export const login_controller = async (ctx: Context) => {
     ctx.cookie["access_token"].set({
         value: access_token,
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: false,
+        sameSite: 'lax',
         maxAge: 60 * 60, // 1h
         path: "/",
+        domain: "localhost",
     });
 
     ctx.cookie["refresh_token"].set({
         value: refresh_token,
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: false,
+        sameSite: 'lax',
         maxAge: 60 * 60 * 24 * 7, // 7d
         path: "/",
+        domain: "localhost",
     });
 
     const updated_user = await db

@@ -3,6 +3,7 @@ import { db } from "../db";
 import { IUsers, users } from "../db/schemas/users.schema";
 import { ApiResponse } from "../utils/ApiResponse";
 import bcrypt from "bcryptjs";
+import { Context } from "elysia";
 
 interface IRegisterBody {
     username: string;
@@ -10,8 +11,8 @@ interface IRegisterBody {
     password: string;
 }
 
-export const register_controller = async ({ body }: { body: IRegisterBody }) => {
-    const { username, email, password } = body;
+export const register_controller = async (ctx: Context) => {
+    const { username, email, password } = (await ctx.request.json()) as IRegisterBody;
 
     if (!username || !email || !password) {
         return new ApiResponse({

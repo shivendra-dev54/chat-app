@@ -6,6 +6,7 @@
     "dev": "bun run --watch src/index.ts"
   },
   "dependencies": {
+    "@elysiajs/cookie": "^0.8.0",
     "@elysiajs/cors": "^1.3.3",
     "bcryptjs": "^3.0.2",
     "dotenv": "^17.2.1",

@@ -3,26 +3,47 @@ import { db } from "../db";
 import { chats } from "../db/schemas/chats.schema";
 import { ApiResponse } from "../utils/ApiResponse";
 import { Context } from "elysia";
+import * as jose from "jose";
 
 export const get_chats_controller = async (ctx: Context) => {
     try {
+        const token = ctx.cookie?.access_token?.value;
 
-        const token = ctx.cookie?.access_token?.value || "cute";
-        
         if (!token) {
             return new ApiResponse({
                 status: 401,
-                message: "Unauthorized",
-                data: ctx.cookie,
+                message: "Unauthorized - No access token",
+                data: {},
+                success: false,
+            }).toJSON();
+        }
+
+        // 🔑 verify access token
+        const secret = new TextEncoder().encode(process.env.ACCESS_TOKEN);
+        let payload: jose.JWTPayload;
+        try {
+            const verified = await jose.jwtVerify(token, secret);
+            payload = verified.payload;
+        } catch (err: any) {
+            if (err.code === "ERR_JWT_EXPIRED") {
+                return new ApiResponse({
+                    status: 401,
+                    message: "Access token expired. Please refresh.",
+                    data: {},
+                    success: false,
+                }).toJSON();
+            }
+            return new ApiResponse({
+                status: 401,
+                message: "Invalid access token",
+                data: {},
                 success: false,
             }).toJSON();
         }
 
         const body = await ctx.request.json();
 
-        // Add null check for body
-        if (!body || typeof body !== 'object') {
-            console.log("Body is missing or invalid:", body);
+        if (!body || typeof body !== "object") {
             return new ApiResponse({
                 status: 400,
                 message: "Request body is required and must be an object",
@@ -37,6 +58,16 @@ export const get_chats_controller = async (ctx: Context) => {
             return new ApiResponse({
                 status: 400,
                 message: "sender_id and receiver_id are required",
+                data: null,
+                success: false,
+            }).toJSON();
+        }
+
+        // 🔒 optional: ensure that the user making request is either sender or receiver
+        if (payload.id !== sender_id && payload.id !== receiver_id) {
+            return new ApiResponse({
+                status: 403,
+                message: "Forbidden - You are not part of this chat",
                 data: null,
                 success: false,
             }).toJSON();
@@ -59,7 +90,6 @@ export const get_chats_controller = async (ctx: Context) => {
             data: all_chats,
             success: true,
         }).toJSON();
-
     } catch (error) {
         console.error("Error fetching chats:", error);
         return new ApiResponse({

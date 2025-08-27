@@ -7,7 +7,7 @@ export default function Contact() {
         {/* Header */}
         <div className="text-center">
           <h1 className="text-3xl font-bold text-blue-400">Get in Touch</h1>
-          <p className="mt-2 text-gray-400">Let’s connect and build something amazing 🚀</p>
+          <p className="mt-2 text-gray-400">Let`s connect and build something amazing 🚀</p>
         </div>
 
         {/* Contact Info */}

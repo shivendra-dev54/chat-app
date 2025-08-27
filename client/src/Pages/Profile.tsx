@@ -4,7 +4,7 @@ import { useAuthStore } from "../store/authStore";
 import axios from "axios";
 
 export const Profile = () => {
-    const { user, update_user } = useAuthStore();
+    const { user, setUser } = useAuthStore();
     const navigate = useNavigate();
 
     const [profile, setProfile] = useState<{
@@ -41,22 +41,22 @@ export const Profile = () => {
                     about: about,
                 },
                 {
-                    withCredentials: true, // same as credentials: "include"
+                    withCredentials: true,
                     headers: {
                         "Content-Type": "application/json",
                     },
                 }
             );
 
-            const data = await res.data;
-            update_user({
-                id: data.data.id,
-                username: data.data.username,
-                email: data.data.email,
-                about: data.data.about
+            const data = await res.data.data.user;
+            setUser({
+                id: data.id,
+                username: data.username,
+                email: data.email,
+                about: data.about
             });
 
-            if (data.success) {
+            if (res.data.success) {
                 setProfile((prev) => prev ? { ...prev, about } : prev);
                 setEditMode(false); // close popup after update
             }

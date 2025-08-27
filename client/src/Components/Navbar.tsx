@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { FaUserCircle } from "react-icons/fa";
 import { useAuthStore } from "../store/authStore";
-import axios from "axios";
 import toast from "react-hot-toast";
 
 export const Navbar = () => {
@@ -10,28 +9,19 @@ export const Navbar = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const navigate = useNavigate();
 
-  const { user, reset } = useAuthStore();
-
+  const { user, logout } = useAuthStore();
   const isLoggedIn = Boolean(user);
 
   const handleLogout = async () => {
     try {
-      await axios.delete("http://localhost:64000/api/auth/logout");
-
-      toast.dismissAll();
-      toast.success("Logged out successfully");
-
-      reset();
+      await logout();
+      toast.dismiss();
+      toast.success("Logged out!");
       navigate("/");
     } catch (err) {
-      toast.dismissAll();
-      toast.error("Logout failed");
-
-      if (axios.isAxiosError(err)) {
-        console.error("Logout error:", err.response?.data || err.message);
-      } else {
-        console.error("Unexpected logout error:", err);
-      }
+      toast.dismiss();
+      toast.error("Unable to log out");
+      console.error(err);
     } finally {
       setUserMenuOpen(false);
       setMenuOpen(false);
@@ -39,13 +29,11 @@ export const Navbar = () => {
   };
 
   return (
-    <nav className="w-full bg-gray-900 text-white flex items-center justify-between px-6 h-16 shadow-md relative">
+    <nav className="w-full bg-gray-900 text-white flex items-center justify-between px-6 h-16 shadow-md relative select-none">
       {/* Logo */}
       <button
-        className="text-xl font-bold text-blue-400 select-none hover:cursor-pointer"
-        onClick={() => {
-          navigate(user ? "/community" : "/");
-        }}
+        className="text-xl font-bold text-blue-400 hover:cursor-pointer"
+        onClick={() => navigate(isLoggedIn ? "/community" : "/")}
       >
         Chat
       </button>
@@ -54,14 +42,14 @@ export const Navbar = () => {
       <div className="hidden md:flex items-center gap-6">
         <Link
           to={isLoggedIn ? "/community" : "/"}
-          className="hover:text-blue-300 transition font-medium select-none"
+          className="hover:text-blue-300 transition font-medium"
         >
           Home
         </Link>
 
         <Link
           to="/contact"
-          className="hover:text-blue-300 transition font-medium select-none"
+          className="hover:text-blue-300 transition font-medium"
         >
           Contact
         </Link>
@@ -83,17 +71,17 @@ export const Navbar = () => {
             </button>
 
             {userMenuOpen && (
-              <div className="absolute right-0 mt-2 w-40 bg-gray-800 rounded-xl shadow-lg py-2 flex flex-col z-50 animate-fadeIn">
+              <div className="absolute right-0 mt-2 w-40 bg-gray-800 rounded-xl shadow-lg py-2 flex flex-col z-50">
                 <Link
                   to="/profile"
-                  className="px-4 py-2 hover:bg-gray-700 transition rounded-lg select-none"
+                  className="px-4 py-2 hover:bg-gray-700 transition rounded-lg"
                   onClick={() => setUserMenuOpen(false)}
                 >
                   Profile
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="text-left px-4 py-2 hover:bg-gray-700 transition rounded-lg select-none"
+                  className="text-left px-4 py-2 hover:bg-gray-700 transition rounded-lg"
                 >
                   Logout
                 </button>
@@ -107,7 +95,7 @@ export const Navbar = () => {
       <div className="md:hidden flex items-center">
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="focus:outline-none flex flex-col w-6 h-6 justify-between items-center gap-1"
+          className="flex flex-col w-6 h-6 justify-between items-center gap-1"
         >
           <span className="h-0.5 w-full bg-white rounded" />
           <span className="h-0.5 w-full bg-white rounded" />
@@ -123,7 +111,7 @@ export const Navbar = () => {
       >
         <Link
           to={isLoggedIn ? "/community" : "/"}
-          className="px-6 py-4 hover:bg-gray-800 transition border-b border-gray-700 select-none"
+          className="px-6 py-4 hover:bg-gray-800 transition border-b border-gray-700"
           onClick={() => setMenuOpen(false)}
         >
           Home
@@ -131,7 +119,7 @@ export const Navbar = () => {
 
         <Link
           to="/contact"
-          className="px-6 py-4 hover:bg-gray-800 transition border-b border-gray-700 select-none"
+          className="px-6 py-4 hover:bg-gray-800 transition border-b border-gray-700"
           onClick={() => setMenuOpen(false)}
         >
           Contact
@@ -140,7 +128,7 @@ export const Navbar = () => {
         {!isLoggedIn ? (
           <Link
             to="/auth/login"
-            className="px-6 py-4 hover:bg-gray-800 transition border-b border-gray-700 select-none"
+            className="px-6 py-4 hover:bg-gray-800 transition border-b border-gray-700"
             onClick={() => setMenuOpen(false)}
           >
             Login
@@ -149,14 +137,14 @@ export const Navbar = () => {
           <>
             <Link
               to="/profile"
-              className="px-6 py-4 hover:bg-gray-800 transition border-b border-gray-700 select-none"
+              className="px-6 py-4 hover:bg-gray-800 transition border-b border-gray-700"
               onClick={() => setMenuOpen(false)}
             >
               Profile
             </Link>
             <button
               onClick={handleLogout}
-              className="text-left px-6 py-4 hover:bg-gray-800 transition border-b border-gray-700 select-none"
+              className="text-left px-6 py-4 hover:bg-gray-800 transition border-b border-gray-700"
             >
               Logout
             </button>

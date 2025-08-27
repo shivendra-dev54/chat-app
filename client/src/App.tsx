@@ -25,7 +25,11 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/community" element={<Community />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/chat/:id" element={<Chat />} />
+          <Route path="/chat/:id" element={
+            <div className="h-full overflow-y-scroll">
+              <Chat />
+            </div>
+          } />
         </Routes>
       </div>
     </div>

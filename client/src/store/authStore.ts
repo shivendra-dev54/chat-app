@@ -1,3 +1,4 @@
+import axios from "axios";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
@@ -10,16 +11,33 @@ export interface IUser {
 
 interface AuthState {
   user: IUser | null;
-  update_user: (user: IUser) => void;
-  reset: () => void;
+  setUser: (user: IUser) => void;
+  logout: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-      update_user: (user) => set({ user }),
-      reset: () => set({ user: null }),
+
+      setUser: (user) => set({ user }),
+
+      logout: async () => {
+        try {
+          await axios.delete(
+            "http://localhost:64000/api/auth/logout",
+            { withCredentials: true }
+          );
+        } catch (err) {
+          if (axios.isAxiosError(err)) {
+            console.error("Logout error:", err.response?.data || err.message);
+          } else {
+            console.error("Unexpected logout error:", err);
+          }
+        } finally {
+          set({ user: null });
+        }
+      },
     }),
     {
       name: "auth-storage",

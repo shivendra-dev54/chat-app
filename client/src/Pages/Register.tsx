@@ -1,8 +1,8 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import toast from "react-hot-toast";
 import { useAuthStore } from "../store/authStore";
+import { axios_helper } from "../lib/api";
 
 export const Register = () => {
     const navigate = useNavigate();
@@ -48,34 +48,48 @@ export const Register = () => {
         setLoading(true);
 
         try {
-            const url = 'http://localhost:64000/api/auth/register';
+            const url = "http://localhost:64000/api/auth/register";
 
-            await axios.post(url, {
-                username: _user.username,
-                email: _user.email,
-                password: _user.password
+            const res = await axios_helper({
+                url,
+                method: "POST",
+                credentials: true,
+                body: {
+                    username: _user.username,
+                    email: _user.email,
+                    password: _user.password,
+                },
             });
+
+            if (res.error) {
+                toast.dismissAll();
+                toast.error("Registration failed");
+                console.error("Error:", res.data);
+                return;
+            }
+
+            toast.dismissAll();
+            toast.success("Registration successful 🎉");
 
             setUser({
                 username: "",
                 email: "",
-                password: ""
+                password: "",
             });
 
             navigate("/auth/login");
         } catch (err: unknown) {
-            if (err instanceof Error && err.message) {
-                console.error("Server Error:", err.message);
-            } else {
-                console.error("Network/Error:", err);
-            }
+            console.error("Unexpected Error:", err);
+            toast.dismissAll();
+            toast.error("Something went wrong");
         } finally {
             setLoading(false);
         }
-    }
+    };
+
 
     return (
-        <div className="flex items-center justify-center h-[calc(100vh-4rem)] w-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-950 px-6">
+        <div className="flex items-center justify-center h-[calc(100vh-4rem)] w-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-950 px-6 select-none">
             <div className="bg-gray-900/90 backdrop-blur-md rounded-2xl shadow-2xl p-10 w-full max-w-md">
                 <h1 className="text-4xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 text-center animate-pulse">
                     Register

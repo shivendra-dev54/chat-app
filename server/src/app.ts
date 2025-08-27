@@ -4,11 +4,13 @@ import { chat_router } from "./routes/chat.route";
 import { ApiResponse } from "./utils/ApiResponse";
 import { saveChatService } from "./services/chat.service";
 import cors from "@elysiajs/cors";
+import { cookie } from '@elysiajs/cookie'
 import { user_router } from "./routes/user.route";
 
 const connectedUsers = new Map<number, any>();
 
 export const app = new Elysia()
+    .use(cookie())
     .use(cors({
         origin: process.env.CLIENT_URL!,
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
@@ -74,16 +76,6 @@ export const app = new Elysia()
                             receiver_id,
                             content: content.trim(),
                         });
-
-                        // Send to sender
-                        // const senderWs = connectedUsers.get(sender_id);
-                        // if (senderWs) {
-                        //     senderWs.send(JSON.stringify({
-                        //         type: "chat",
-                        //         ...chat,
-                        //         from: "self"
-                        //     }));
-                        // }
 
                         // Send to receiver
                         const receiverWs = connectedUsers.get(receiver_id);
